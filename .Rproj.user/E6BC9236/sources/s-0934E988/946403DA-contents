@@ -1,0 +1,303 @@
+---
+title: "Manipulating Data using dplyr: Quiz & Exercises"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+    df_print: paged
+runtime: shiny_prerendered
+description: >
+  Learn to manipulate data with the package dplyr.
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(dplyr)
+library(ggplot2)
+tutorial_options(exercise.timelimit = 10)
+options(max.print=200, dplyr.summarise.inform = FALSE)
+imdb <- readRDS("imdb2020.RDS")
+```
+
+
+
+## Quiz
+
+*Question 1*
+
+```{r Q1, echo=FALSE}
+question("What dplyr function is used to create or modify columns of a dataset?",
+  answer("select()", message="select is used to retrieve columns"),
+  answer("filter()", message="filter is used to retrieve rows"),
+  answer("arrange()", message="arrange is used to order rows"),
+  answer("summarise()", message="summarise is used to create summaries"),
+  answer("mutate()",correct=TRUE),
+  answer("group_by()", message="group_by is used to group rows based on some columns"), allow_retry = TRUE,random_answer_order = TRUE
+)
+```
+
+*Question 2*
+
+```{r Q2, echo=FALSE}
+question("Which dplyr functions could be responsible for having an output with fewer columns than the original dataset? (select ALL that apply)",
+  answer("select()", message="select() is correct, but there is another one", correct = TRUE),
+  answer("filter()", message="with filter it's the number of rows that gets reduced"),
+  answer("arrange()", message="arrange does not affect the number of rows or columns"),
+  answer("summarise()", message="summarise() is correct, but there is another one", correct = TRUE),
+  answer("mutate()", message="mutate can only increase the number of columns"),
+  answer("group_by()", message="group_by does not affect the number of rows or columns"), allow_retry = TRUE,random_answer_order = TRUE
+)
+```
+
+*Question 3*
+
+```{r Q3, echo=FALSE}
+question("Which of these commands is correct, if I want to retrieve the entries of type movie",
+  answer("filter(imdb, Type=='movie')", message="there is no column 'Type' in the dataset"),
+  answer("filter(imdb, type=='movie')", correct = TRUE),
+  answer("filter(imdb, Type='movie')", message="there is no column 'Type' in the dataset and the single equals sign '=' is used to assign values or objects to names"),
+  answer("filter(imdb, type='movie')", message="the single equals sign '=' is used to assign values or objects to names"), allow_retry = TRUE,random_answer_order = TRUE
+)
+```
+
+*Question 4*
+
+```
+group_by(imdb, year)
+summarise(imdb_grouped, meanVotes = mean(numVotes))
+
+
+```
+
+```{r Q4, echo=FALSE}
+question("What should I add to the above command to obtain the average number of votes by year",
+  answer("`arrange(numVotes)` in between the two functions", message="look at the second line - we use the data imdb_grouped, but it is not defined yet"),
+  answer("`ungroup(imdb_grouped)` after the function summarise()", message="look at the second line - we use the data imdb_grouped, but it is not defined yet"),
+  answer("`imdb_grouped <-` in front of the function group_by()", correct=TRUE),
+  answer("`%>%` after the function group_by()", message="it could work, but we'd also need to remove the data from the function summarise()"), allow_retry = TRUE,random_answer_order = TRUE
+)
+```
+
+```
+imdb %>%
+  mutate(age=year-birthYear) %>%
+    filter(age>70 & type=="movie") %>%
+      group_by(year) %>%
+        summarise(n=n())
+
+```
+```{r Q5, echo=FALSE}
+question("What is the output of the above command (try to find the answer without running the command)",
+  answer("it shows for each year, the number of movies released by a director older than 70 years", correct=TRUE),
+  answer("It shows for each director older than 70 years old, the number of years where he released at least one movie", message="the 4th line is grouping the rows by year, so the function n() in the 5th line cannot be counting a number of year"),
+  answer("It shows for each year, the number of directors who are currently older than 70 years old and released a movie in that year.", message="the variable age is calculated using the column year, not the value 2020, so age cannot be the 'current' age of the directors"),
+  answer("An error, as n is not part of the dataset", message="There is no error in the output. n is created by the function n(), which counts the number of rows."), allow_retry = TRUE,random_answer_order = TRUE
+)
+```
+
+## Exercises
+
+
+**Exercise 1. rank the directors from youngest to oldest**
+
+```{r ex2,exercise=TRUE,error=TRUE}
+
+```
+
+<!--
+```{r ex1-solution}
+
+# without pipe
+arrange(imdb, birthYear)
+
+# with pipe
+imdb %>% arrange(birthYear)
+
+# to help reading the output, it's a good idea to combine the command with a select():
+imdb %>% 
+  arrange(birthYear) %>% 
+   select(director, birthYear)
+
+```
+-->
+
+
+
+**Exercise 2. Identify and correct the four mistakes that I made in the command below, to obtain the median duration of all the movies released after the year 2000**
+
+```{r ex1,exercise=TRUE,error=TRUE}
+imdb %>%
+  filter(imdb, type="movie" & year>2000) %>%
+   sumarize(medianDuration = median(length)
+```
+
+<!--
+```{r ex2-solution}
+imdb %>%
+  filter(type=="movie" & year>2000) %>%
+   summarise(medianDuration = median(length))
+
+# 1- either imdb should be removed from filter, or the first line should be deleted
+# 2- the condition of the filter function needs a double equals
+# 3- the function summarise was misspelled
+# 4- the parenthesis of the function summarise was not closed
+```
+-->
+
+
+
+
+
+**Exercise 3. Which are the earliest released titles for each type of entry**
+
+```{r ex3, exercise=TRUE}
+
+```
+
+<!--
+```{r ex3-solution}
+imdb %>% 
+  group_by(type) %>%
+    filter(year==min(year))
+```
+-->
+
+
+**Exercise 4. Produce a list of Thriller TV Series who received more than 10000, ordered from best to worst average ratings**
+
+```{r ex4,exercise=TRUE}
+
+```
+
+<!--
+```{r ex4-solution}
+imdb %>%
+  filter(thriller==TRUE & type=="tvSeries" & numVotes>10000) %>%
+    arrange(desc(averageRating))
+```
+-->
+
+
+
+
+**Exercise 5. What are the minimum, average and maximum age of a movie director releasing a movie in the imdb dataset? (you will need to add `na.rm=T` in your summary functions to deal with the entries where the year of birth of the director is missing)**
+
+```{r ex5,exercise=TRUE}
+
+```
+
+<!--
+```{r ex5-solution}
+imdb %>%
+  mutate(age=year-birthYear) %>%
+    filter(type=="movie") %>%
+      summarise(minAge=min(age, na.rm=T), meanAge=mean(age, na.rm=T), maxAge=max(age, na.rm=T))
+
+```
+-->
+
+
+**Exercise 6. Generate a boxplot of average rating by type of entry having received more than 10000 votes**
+
+```{r ex6,exercise=TRUE}
+
+```
+<!--
+```{r ex6-solution}
+imdb %>%
+  filter(numVotes>10000)%>%
+    ggplot(aes(x=type, y=averageRating))+
+      geom_boxplot()
+
+```
+-->
+
+
+**Exercise 7. In three parts: **
+
+1. **Find who is the worst director of romantic comedy movies, only counting directors who made at least 5 romantic comedies that received at least 5000 votes. **
+2. **Find the worst rated movie (of any genre) that this director has released.**
+3. **Watch this movie.**
+
+*Use the first box for 1. and the second box for 2. Skip 3. if you find it too hard*
+
+```{r ex7_1,exercise=TRUE}
+
+```
+<!--
+```{r ex7_1-solution}
+imdb %>%
+  group_by(director) %>%
+    filter(romance==TRUE & comedy==TRUE & type=="movie" & numVotes>5000) %>%
+      summarize(n=n(), meanRating=mean(averageRating))%>%
+        filter(n>=5)%>%
+          filter(meanRating==min(meanRating))
+```
+-->
+
+```{r ex7_2,exercise=TRUE}
+
+```
+<!--
+```{r ex7_2-solution}
+imdb %>%
+  filter(director=="Tyler Perry" & type=="movie") %>%
+    arrange(averageRating)
+```
+-->
+
+
+Solutions to these exercises will be made available when the next module of the course becomes live. Check the course site for details.
+
+
+## Appendix: 'imdb' dataset
+
+For this session, we are using a dataset called "imdb", which we constructed from the subsets of the Internet Movie Database made available for non-commercial purposes by the IMDb team:
+<a href="https://www.imdb.com/interfaces/" target="_blank">https://www.imdb.com/interfaces/</a>
+
+
+It contains the following information for all the entries having more than 500 votes, that are not of type "tvEpisodes" and for which information about year of release, running time and director(s) was available at the time of extraction (28/09/2020):  
+
+
+```{r, echo=FALSE,message=FALSE,warning=FALSE}
+library(knitr)
+data.frame(Column=c("title","type","year","length","numVotes","averageRating","director","birthYear","animation","action", "adventure", "comedy", "documentary", "fantasy", "romance", "sci_fi", "thriller"),
+           Description=c("popular title of the entry",
+                         "type of entry: movie, short, tvMiniSeries, tvMovie, tvSeries, tvShort, tvSpecial, video or videoGame",
+                         "year of release (for series, year of release of the first episode)",
+                         "duration in minutes",
+                         "number of votes for the entry",
+                         "IMDb's weighted average rating for the entry",
+                         "director of the entry (if multiple directors, the first one was picked)",
+                         "year of birth of the director",
+                        "the entry is of genre animation (TRUE/FALSE)",
+                        "the entry is of genre action (TRUE/FALSE)",
+                        "the entry is of genre adventure (TRUE/FALSE)",
+                        "the entry is of genre comedy (TRUE/FALSE)",
+                        "the entry is of genre documentary (TRUE/FALSE)",
+                        "the entry is of genre fantasy (TRUE/FALSE)",
+                        "the entry is of genre romance (TRUE/FALSE)",
+                        "the entry is of genre science fiction (TRUE/FALSE)",
+                        "the entry is of genre thriller (TRUE/FALSE)")) %>% kable()
+
+```
+
+
+The dataset has 61,776 rows. It's too much to be displayed here. Below are 50 arbitrary rows though. Spend a bit of time familiarising yourself with the columns of this dataset. You can use the arrow keys to scroll right and left.
+
+```{r,echo=FALSE}
+DT::datatable(imdb[c(1:50)*1000,])
+
+```
+
+## Appendix: Useful reference links  
+
+
+The official dplyr documentation: <a href="https://dplyr.tidyverse.org/" target="_blank">https://dplyr.tidyverse.org/</a> 
+
+dplyr CheatSheet:<a href="https://github.com/rstudio/cheatsheets/blob/master/data-transformation.pdf" target="_blank">https://github.com/rstudio/cheatsheets/blob/master/data-transformation.pdf   </a>  
+
+Data Manipulation Tools - Rstudio video:
+<a href="https://www.youtube.com/watch?v=Zc_ufg4uW4U" target="_blank">https://www.youtube.com/watch?v=Zc_ufg4uW4U   </a> 
+
+Some documentation on subsetting r-objects using base-R: <a href="https://bookdown.org/rdpeng/rprogdatascience/subsetting-r-objects.html" target="_blank">https://bookdown.org/rdpeng/rprogdatascience/subsetting-r-objects.html </a> 
