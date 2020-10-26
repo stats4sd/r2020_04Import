@@ -42,12 +42,14 @@ You also want your column names to be at the very top, in one **single** row, an
 knitr::include_graphics("img/well_formatted.JPG")
 ```
 
+
+
 ![](tesr.png)
 Everything in your rectangle of data should be part of your data. There's no problem with having empty cells, but these have to be empty because the corresponding values are missing. 
 
 
 ### merged cells
-In spreadsheets, it is tempting to merge your cells in order to make things look neater. If you want to use your data in any other software though it is bad idea to have cells that are merged. Instead, simply copy the value in all the cells that you thought about merging. Here is an example:
+In spreadsheets, i  t is tempting to merge your cells in order to make things look neater. If you want to use your data in any other software though it is bad idea to have cells that are merged. Instead, simply copy the value in all the cells that you thought about merging. Here is an example:
 
 
 ### Missing values
